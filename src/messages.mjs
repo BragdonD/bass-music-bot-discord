@@ -28,7 +28,7 @@ export const createErrorJoinChannel = async () => {
             .setTitle("Added track")
             .addField("Track", `**[${audio.informations.SearchInfo.title}](${audio.informations.SearchInfo.link})**`, false)
             .addField("Creator", `**[${audio.informations.SearchInfo.channelTitle}](https://www.youtube.com/channel/${audio.informations.SearchInfo.channelId})**`, false)
-            .addField("Track Length", audio.informations.TrackInfo.items[0].contentDetails.duration , true)
+            .addField("Track Length", createTimeStampAudio(audio.informations.TrackInfo.items[0].contentDetails.duration) , true)
             .addField("Position in Queue", audio.position.toString(), true)
             .setThumbnail(audio.informations.SearchInfo.thumbnails.default.url)
         return embedMessageAdd;
@@ -50,4 +50,49 @@ export const sendEmbedMessage = async (message, embedMessage) => {
     catch (e) {
         console.log(e);
     }
+}
+
+/**
+ * 
+ * @param {String} duration Iso 8601 format given by Ytb Api v3
+ */
+const createTimeStampAudio = (duration) => {
+    const troncation = duration.slice(2);
+    
+    if(troncation.indexOf("H") == -1){
+        if(troncation.indexOf("M") != -1){
+            const min = troncation.slice(0,1);
+            const sec = troncation.slice(2,3);
+            return `${transformDuration(min)}:${transformDuration(sec)}`;
+        }
+        else {
+            const sec = troncation.slice(3,4);
+            return `00:${transformDuration(sec)}`;
+        }
+    }
+    else {
+        const hour = troncation.slice(0,1);
+        const min = troncation.slice(3,4);
+        const sec = troncation.slice(6,7)
+        return `${transformDuration(hour)}:${transformDuration(min)}:${transformDuration(sec)}`
+    }
+}
+
+/**
+ * 
+ * @param {String} duration 
+ */
+const transformDuration = (duration) => {
+    if(duration != "") {
+        if(parseInt(duration) < 10){
+            return `0${duration}`;
+        }
+        else {
+            return duration;
+        }
+    }
+    else {
+        return "00"
+    }
+   
 }
